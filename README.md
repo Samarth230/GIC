@@ -97,7 +97,7 @@ Premiums recalculate every Sunday night with **no manual renewal needed**.
 
 ---
 
-## Four Key Features
+## Four Differentiating Features
 
 ### 1. Dual-Trigger Engine
 Combining external and behavioral triggers to ensure payouts reflect real income loss, not just weather events. This design integrates fraud detection, payout accuracy, and business viability seamlessly.
