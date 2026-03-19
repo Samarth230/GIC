@@ -164,7 +164,7 @@ The stronger distribution model is B2B2C. Delivery platforms face worker churn a
 
 ---
 
-## 👥 Collaborators
+## Collaborators
 
 <p align="center">
   <a href="https://github.com/Samarth230">
