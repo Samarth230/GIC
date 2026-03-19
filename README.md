@@ -163,3 +163,33 @@ Workers pay Rs. 79/week. At an average payout of Rs. 280 and 1.4 claims per quar
 The stronger distribution model is B2B2C. Delivery platforms face worker churn and fulfillment drops during disruptions. A platform subsidizing Rs. 30/worker/week reduces the worker's cost to Rs. 49 while solving a retention problem the platform already has. At 10,000 active workers, weekly gross written premium is Rs. 790,000 — viable for a single-city deployment before any expansion.
 
 ---
+
+## 👥 Collaborators
+
+<p align="center">
+  <a href="https://github.com/Samarth230">
+    <img src="https://github.com/Samarth230.png" width="80px;" alt="Samarth230"/>
+  </a>
+  <a href="https://github.com/AryanSingh2025">
+    <img src="https://github.com/AryanSingh2025.png" width="80px;" alt="AryanSingh2025"/>
+  </a>
+  <a href="https://github.com/Chandroja3011">
+    <img src="https://github.com/Chandroja3011.png" width="80px;" alt="Chandroja3011"/>
+  </a>
+  <a href="https://github.com/devu2406">
+    <img src="https://github.com/devu2406.png" width="80px;" alt="devu2406"/>
+  </a>
+  <a href="https://github.com/rohanrpais">
+    <img src="https://github.com/rohanrpais.png" width="80px;" alt="rohanrpais"/>
+  </a>
+</p>
+
+<p align="center">
+  <b>Samarth</b> &nbsp;&nbsp;
+  <b>Aryan Singh</b> &nbsp;&nbsp;
+  <b>Chandroja</b> &nbsp;&nbsp;
+  <b>Devu</b> &nbsp;&nbsp;
+  <b>Rohan Pais</b>
+</p>
+
+---
