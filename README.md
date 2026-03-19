@@ -118,7 +118,7 @@ Output: Weekly premium value and zone-level risk tier.
 Rolling 4-week earnings baseline per worker per window type. Payout triggered only when activity drops below 1.5 standard deviations during a confirmed external trigger. Prevents payout when disruption occurs but worker continues earning normally.
 
 **Fraud Detection**
-- Cross-signal consistency: If external trigger fires but worker activity does not drop, claim is automatically rejected.
+- Cross-signal consistency: If external trigger activates but worker activity does not drop, claim is automatically rejected.
 - Path plausibility: Worker's GPS location cross-referenced against declared operating zone at claim time.
 - Claim pattern anomaly: Isolation Forest model on simulated claim history flags workers whose frequency or payout amounts deviate significantly from zone peer group.
 - Duplicate prevention: Each claim tied to a unique trigger event ID, worker ID, and time window at database level.
