@@ -66,7 +66,7 @@ flowchart LR
 ### Dynamic Premium Calculation (AI-1)
 
 ```
-Weekly Premium = Base (₹79) + Zone Adj + Streak Discount + Forecast Surcharge
+Weekly Premium = Base (₹39) + Zone Adj + Streak Discount + Forecast Surcharge
 Floor: ₹39 / Ceiling: ₹89 / Target BCR: 0.55–0.70
 ```
 
