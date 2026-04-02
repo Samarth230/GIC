@@ -260,6 +260,36 @@ GIC is designed as a rider benefit that costs platforms almost nothing:
 - ✅ No manual claims process — fully parametric and automated
 - ✅ Privacy: Location used **only** for zone detection — never stored or shared
 
+
+## Team
+
+<p align="center">
+  <a href="https://github.com/Samarth230">
+    <img src="https://github.com/Samarth230.png" width="60px"/><br/>
+    <sub><b>Samarth230</b></sub>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/rohanrpais">
+    <img src="https://github.com/rohanrpais.png" width="60px"/><br/>
+    <sub><b>rohanrpais</b></sub>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/devu2406">
+    <img src="https://github.com/devu2406.png" width="60px"/><br/>
+    <sub><b>devu2406</b></sub>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/Chandroja3011">
+    <img src="https://github.com/Chandroja3011.png" width="60px"/><br/>
+    <sub><b>Chandroja3011</b></sub>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/AryanSingh2025">
+    <img src="https://github.com/AryanSingh2025.png" width="60px"/><br/>
+    <sub><b>AryanSingh2025</b></sub>
+  </a>
+</p>
+
 ---
 
 ## Team
