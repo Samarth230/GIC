@@ -72,11 +72,11 @@ Floor: ₹39 / Ceiling: ₹89 / Target BCR: 0.55–0.70
 
 | Factor | Example (Adyar) |
 |---|---|
-| Base premium | ₹79 |
+| Base premium | ₹29 |
 | Zone adjustment (high risk) | +₹12 |
 | Streak discount (4 clean weeks) | −₹16 |
 | Forecast surcharge (rain expected) | +₹8 |
-| **This week** | **₹83** |
+| **This week** | **₹33** |
 
 ### Claims Management (Automated, Zero-Touch)
 4-step automated flow — no worker action required:
