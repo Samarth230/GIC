@@ -48,6 +48,17 @@ flowchart LR
 
 ---
 
+## Website First Look 
+
+<img width="584" height="409" alt="Screenshot 2026-04-03 163649" src="https://github.com/user-attachments/assets/0663880d-ee42-458d-bdbf-d1b817439578" />
+
+<img width="1919" height="884" alt="Screenshot 2026-04-03 163537" src="https://github.com/user-attachments/assets/c31f5dff-6747-4983-a7f0-a9c8a2c927fa" />
+
+<img width="799" height="874" alt="Screenshot 2026-04-03 163641" src="https://github.com/user-attachments/assets/7ce808e3-f6b2-44e1-82e5-e72aa8dc135f" />
+
+<img width="1919" height="934" alt="Screenshot 2026-04-03 163821" src="https://github.com/user-attachments/assets/2c05ba23-dad3-4584-b1be-1572ed5624e9" />
+
+
 ## Key Features
 
 ### Registration & Location Detection
@@ -246,7 +257,7 @@ Dev_Trail/
 
 GIC is designed as a rider benefit that costs platforms almost nothing:
 
-- **Worker pays** the weekly premium (₹39–89)
+- **Worker pays** the weekly premium (₹29–89)
 - **Platform contributes** a small co-pay or data feed
 - **Result:** improved rider retention, reduced churn during bad weather, ESG compliance
 
@@ -255,7 +266,7 @@ GIC is designed as a rider benefit that costs platforms almost nothing:
 ## Constraints Confirmed
 
 - ✅ Coverage: **loss of income ONLY** — no health, life, accident, vehicle repair
-- ✅ Pricing: **Weekly** premium model (₹39–89/week)
+- ✅ Pricing: **Weekly** premium model (₹29–89/week)
 - ✅ Persona: **Food delivery** (Swiggy/Zomato), Chennai
 - ✅ No manual claims process — fully parametric and automated
 - ✅ Privacy: Location used **only** for zone detection — never stored or shared
