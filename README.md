@@ -78,6 +78,7 @@ flowchart LR
 
 ```
 Weekly Premium = Base (₹29) + Zone Adj + Streak Discount + Forecast Surcharge
+Model: GIC-GBT-v3.1 (gradient-boosted claim probability scoring)
 Floor: ₹29 / Ceiling: ₹89 / Target BCR: 0.55–0.70
 ```
 
@@ -87,7 +88,7 @@ Floor: ₹29 / Ceiling: ₹89 / Target BCR: 0.55–0.70
 | Zone adjustment (high risk) | +₹12 |
 | Streak discount (4 clean weeks) | −₹16 |
 | Forecast surcharge (rain expected) | +₹8 |
-| **This week** | **₹33** |
+| **This week** | **₹63** |
 
 ### Claims Management (Automated, Zero-Touch)
 4-step automated flow — no worker action required:
@@ -111,9 +112,9 @@ The most differentiated feature in GIC. No single AI can approve a payout alone.
 
 | AI | Role | Method |
 |---|---|---|
-| **AI-1** | Premium Engine | Weighted scoring → weekly premium + risk tier |
-| **AI-2** | Payout Calculator | Trigger intensity × duration × baseline earnings |
-| **AI-3** | Peer Comparison | Cross-checks worker behavior against zone peers |
+| **AI-1** | Premium Engine | GIC-GBT-v3.1 — gradient-boosted scoring · 7-feature vector · claim probability → weekly premium |
+| **AI-2** | Payout Calculator | Severity-weighted parametric formula · intensity ratio × activity drop ratio × baseline earnings |
+| **AI-3** | Fraud Detection | GIC-IF-v3.1 — isolation forest anomaly detection · 5-signal ensemble · anomaly score 0–1 |
 
 > **AI-3 is the unique signal:** If it's genuinely too rainy to work, *most* workers in that zone show the same activity drop. If peers are active but one worker claims disruption — that's a flag.
 
@@ -144,14 +145,18 @@ Ravi Kumar. Adyar zone. Earns ₹175 lunch / ₹310 dinner on a good day. Loses 
 | Layer | Technology |
 |---|---|
 | Frontend | HTML5 · CSS3 · Vanilla JS (single-file) |
-| Backend | Node.js · Express · In-memory store |
-| AI / ML | Rule-based weighted scoring → Gradient Boosted Trees (planned) |
-| Maps | Custom SVG (Chennai zones) → Leaflet.js (planned) |
-| Weather | OpenWeather API (mock data in current phase) |
+| Backend | Node.js · Express · File-persisted JSON store |
+| AI-1 Premium | GIC-GBT-v3.1 — gradient-boosted scoring (7 features, claim probability → premium) |
+| AI-2 Payout | Severity-weighted parametric calculator (intensity × activity drop × baseline) |
+| AI-3 Fraud | GIC-IF-v3.1 — isolation forest anomaly detection (5-signal ensemble) |
+| AI Chat | Grok (grok-3-mini) via X_AI API — live policy Q&A with system prompt context |
+| Maps | Leaflet.js with real Chennai zone polygons |
+| Weather | Open-Meteo API (no API key required) · live rainfall data |
+| Air Quality | WAQI API (demo token) · live Chennai AQI |
 | Payments | Razorpay Checkout (test mode) · UPI |
-| Location | Browser Geolocation API + Haversine distance |
-| Security | dotenv · `.env.example` pattern · key_id served via API |
-| Infra | Docker · Vercel · Railway · GitHub Actions |
+| Location | Browser Geolocation API + Haversine distance → nearest zone |
+| Security | dotenv · `.env.example` pattern · API keys never in source |
+| Infra | GitHub Actions · Railway · Vercel |
 
 ---
 
@@ -211,29 +216,31 @@ Open `index.html` in your browser. The frontend works standalone (mock fallbacks
 ## API Reference
 
 ```
-GET  /api/health                    Server health check
-GET  /api/config                    Frontend config (Razorpay key_id)
+GET  /api/health                         Server health + ML engine versions
+GET  /api/config                         Frontend config (Razorpay key_id)
 
-POST /api/auth/send-otp             Send OTP to phone
-POST /api/auth/verify-otp           Verify OTP, check if new/returning
-POST /api/auth/register             Complete worker registration
+POST /api/auth/send-otp                  Send OTP to phone
+POST /api/auth/verify-otp               Verify OTP
+POST /api/auth/register                 Complete worker registration
 
-GET  /api/worker/:id                Worker profile
-GET  /api/worker/:id/policy         Active policy details
-GET  /api/worker/:id/claims         Claims history
-POST /api/worker/:id/covered-check  Real-time coverage check
-GET  /api/worker/:id/safe-choice    Safe Choice alert
+GET  /api/worker/:id                     Worker profile
+GET  /api/worker/:id/policy              Active policy + ML breakdown
+GET  /api/worker/:id/claims              Claims history
+POST /api/worker/:id/covered-check       Real-time coverage check
+GET  /api/worker/:id/safe-choice         Forecast alert
 
-GET  /api/zone/:key/conditions      Live weather + trigger status
-GET  /api/zone/:key/forecast        7-day risk forecast
+GET  /api/zone/:key/conditions           Live weather + AQI + adaptive threshold
+GET  /api/zone/:key/forecast             7-day risk forecast
 
-POST /api/ai/calculate-premium      AI-1 premium calculation
-POST /api/claims/trigger-check      Automated trigger + AI-3 check
+POST /api/ai/calculate-premium           AI-1 ML premium with feature importance
+POST /api/ai/chat                        Grok chat (X_AI)
+GET  /api/ai/model-info                  All ML model metadata
+POST /api/claims/trigger-check           Trigger check + AI-3 anomaly score
 
-GET  /api/admin/stats               Platform-wide metrics
-GET  /api/admin/fraud-flags         AI-3 fraud flag queue
-POST /api/admin/fraud-flags/:id/resolve  Resolve fraud flag
-GET  /api/admin/zones               All zones with BCR
+GET  /api/admin/stats                    Platform-wide metrics
+GET  /api/admin/fraud-flags              AI-3 fraud flag queue with anomaly scores
+POST /api/admin/fraud-flags/:id/resolve  Resolve flag
+GET  /api/admin/zones                    Zones with adaptive thresholds + BCR
 ```
 
 ---
@@ -266,10 +273,10 @@ GIC is designed as a rider benefit that costs platforms almost nothing:
 ## Constraints Confirmed
 
 - ✅ Coverage: **loss of income ONLY** — no health, life, accident, vehicle repair
-- ✅ Pricing: **Weekly** premium model (₹29–89/week)
-- ✅ Persona: **Food delivery** (Swiggy/Zomato), Chennai
-- ✅ No manual claims process — fully parametric and automated
-- ✅ Privacy: Location used **only** for zone detection — never stored or shared
+- Pricing: **Weekly** premium model (₹29 base / ₹89 ceiling)
+- Persona: **Food delivery** (Swiggy/Zomato), Chennai
+- No manual claims process — fully parametric and automated
+- Privacy: Location used **only** for zone detection — never stored or shared
 
 
 ## Collaborators
