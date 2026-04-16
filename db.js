@@ -56,6 +56,7 @@ const claimSchema = new mongoose.Schema({
   ai3_approved:        Boolean,
   ai3_flag:            String,
   ai3_anomaly_score:   Number,
+  peer_context:        mongoose.Schema.Types.Mixed,
   initiated_at:        String,
   completed_at:        String,
 }, { timestamps: true });

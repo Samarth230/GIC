@@ -3498,6 +3498,7 @@
             </div>
           </div>
         </div>
+      </div>
 
         <!-- ── RIGHT PANEL: Premium + Payouts ── -->
         <div class="dash-right" id="dashRight">
@@ -3538,7 +3539,7 @@
                 id="rpPayoutTotal"></span>
             </div>
             <div id="rpPayoutList"></div>
-            <button onclick="loadMoreClaims()"
+            <button onclick="loadMoreClaims(this)"
               style="width:100%;margin-top:0.5rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-muted);font-size:0.72rem;padding:0.4rem;border-radius:4px;cursor:pointer;font-family:'JetBrains Mono',monospace;">↺
               Refresh</button>
           </div>
@@ -3618,6 +3619,7 @@
       let condState = 0;
       let claimFired = false;
       let sessionClaimCount = 0; // tracks total trigger fires this session — drives payout variety
+      let sessionPayoutHistory = [];
       let calcAnswers = {};
       const SESSION_KEY = 'gic_session_v1';
 
@@ -3628,7 +3630,8 @@
             isAdmin,
             workerId,
             workerData,
-            policyData
+            policyData,
+            sessionPayoutHistory
           };
           localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
         } catch (e) { }
@@ -3648,6 +3651,7 @@
           workerId = saved.workerId || saved.currentUser?.id || null;
           workerData = saved.workerData || null;
           policyData = saved.policyData || null;
+          sessionPayoutHistory = Array.isArray(saved.sessionPayoutHistory) ? saved.sessionPayoutHistory : [];
           return !!currentUser;
         } catch (e) {
           clearSession();
@@ -3675,8 +3679,8 @@
         }
       }
 
-      async function apiPost(path, body) {
-        return apiFetch(path, { method: 'POST', body: JSON.stringify(body) });
+      async function apiPost(path, body, timeoutMs) {
+        return apiFetch(path, { method: 'POST', body: JSON.stringify(body), timeoutMs });
       }
 
       async function checkAPIHealth() {
@@ -4006,6 +4010,7 @@
           if (workerRes && workerRes.id) {
             workerId = 'W-2947';
             workerData = workerRes;
+            sessionPayoutHistory = [];
             currentUser = { name: workerRes.name, platform: workerRes.platform, upi: workerRes.upi, id: workerRes.id };
             saveSession();
             closeAuth();
@@ -4013,6 +4018,7 @@
           } else {
             currentUser = { name: 'Ravi', platform: 'swiggy', upi: '****4821', id: 'W-2947' };
             workerId = 'W-2947';
+            sessionPayoutHistory = [];
             saveSession();
             closeAuth();
             showDashboard(false);
@@ -4020,6 +4026,7 @@
         } else if (res && !res.new_user) {
           workerId = res.worker?.id;
           workerData = res.worker;
+          sessionPayoutHistory = [];
           currentUser = { name: res.worker?.name || 'Worker', platform: res.worker?.platform, upi: res.worker?.upi, id: workerId };
           saveSession();
           closeAuth();
@@ -4042,6 +4049,7 @@
           workerId = res.worker.id;
           workerData = res.worker;
           policyData = res.policy;
+          sessionPayoutHistory = [];
           currentUser = { name: res.worker.name, platform, upi, id: workerId };
         } else {
           // API failed — build workerData from the form values so zone is preserved
@@ -4058,6 +4066,7 @@
             premium: 63, status: 'active',
             premiumBreakdown: { base: 29, zoneAdj: 12, streakDiscount: 0, forecastSurcharge: 8 }
           };
+          sessionPayoutHistory = [];
           currentUser = { name, platform, upi, id: workerId };
         }
         saveSession();
@@ -4076,10 +4085,21 @@
         policyData = null;
         simulationRunning = false;
         if (simulTimer) clearTimeout(simulTimer);
+        if (mapResizeObserver) {
+          mapResizeObserver.disconnect();
+          mapResizeObserver = null;
+        }
+        if (lmap) {
+          lmap.remove();
+          lmap = null;
+          mapOverlays = {};
+          mapZoneBounds = null;
+        }
         clearSession();
         document.getElementById('dashboard').classList.remove('active');
         document.getElementById('landing').style.display = 'block';
         document.body.style.overflow = '';
+        sessionPayoutHistory = [];
       }
 
       // ─── LOCATION DETECTION ───
@@ -4428,6 +4448,11 @@
             fcVal.textContent = (fc >= 0 ? '+' : '') + '₹' + fc;
             fcVal.style.color = fc > 0 ? 'var(--warn)' : fc < 0 ? 'var(--success)' : 'var(--text-muted)';
           }
+
+          // Keep map marker/overlay aligned with whichever zone is currently bound to the worker.
+          syncMapToWorkerZone(true);
+          buildLiveConditionsReal();
+          buildForecastStrip();
         };
 
         renderWorkerDashboard(fallbackWorker, fallbackPolicy, null);
@@ -4520,36 +4545,91 @@
         }
       }
 
+      function formatPayoutDate(rawDate) {
+        if (!rawDate) return '—';
+        const dt = new Date(rawDate);
+        if (Number.isNaN(dt.getTime())) return String(rawDate);
+        return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+
       async function buildPayoutHistory() {
         const wid = workerId || 'W-2947';
-        const res = await apiFetch('/api/worker/' + wid + '/claims');
-        const claims = res?.claims || [
+        const fallbackClaims = [
           { id: 'CLM-001', date: '2026-03-31', shift: 'Dinner', trigger: 'Rain', amount: 310, status: 'paid' },
           { id: 'CLM-002', date: '2026-03-14', shift: 'Lunch', trigger: 'AQI', amount: 190, status: 'paid' },
           { id: 'CLM-003', date: '2026-03-02', shift: 'Dinner', trigger: 'Rain', amount: 280, status: 'paid' },
         ];
+
+        const res = await apiFetch('/api/worker/' + wid + '/claims', { cache: 'no-store' });
+        const apiClaims = Array.isArray(res?.claims) ? res.claims : null;
+
+        let claims = [];
+        if (apiClaims && apiClaims.length > 0) {
+          claims = apiClaims;
+        } else if (sessionPayoutHistory.length > 0) {
+          claims = sessionPayoutHistory;
+        } else if (wid === 'W-2947') {
+          claims = fallbackClaims;
+        }
+
+        claims = claims
+          .filter(c => c && c.amount !== undefined && c.amount !== null)
+          .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
         const el = document.getElementById('rpPayoutList');
         const totalEl = document.getElementById('rpPayoutTotal');
+
         if (el) {
-          el.innerHTML = claims.slice(0, 4).map(c => `
-      <div class="payout-entry">
-        <span class="payout-tick">✓</span>
+          if (claims.length === 0) {
+            el.innerHTML = `
+      <div class="payout-entry" style="align-items:flex-start;">
+        <span class="payout-tick" style="background:rgba(200,169,110,0.12);color:var(--warn);">i</span>
         <div class="payout-info">
-          <div class="payout-amt">₹${c.amount}</div>
-          <div class="payout-meta">${c.date} · ${c.shift}</div>
+          <div class="payout-amt" style="font-size:0.8rem;color:var(--text-secondary);">No payouts yet</div>
+          <div class="payout-meta">When a trigger fires, your payout will appear here automatically.</div>
         </div>
-        <span class="payout-reason-tag">${c.trigger}</span>
-      </div>`
-          ).join('');
+      </div>`;
+          } else {
+            el.innerHTML = claims.slice(0, 6).map(c => {
+              const amount = Number(c.amount) || 0;
+              const trigger = c.trigger || 'Auto';
+              const shift = c.shift || 'Shift';
+              const date = formatPayoutDate(c.date);
+              const status = (c.status || 'paid').toLowerCase();
+              const tick = status === 'paid' ? '✓' : status === 'processing' ? '⏳' : '•';
+              return `
+      <div class="payout-entry">
+        <span class="payout-tick">${tick}</span>
+        <div class="payout-info">
+          <div class="payout-amt">₹${amount}</div>
+          <div class="payout-meta">${date} · ${shift}</div>
+        </div>
+        <span class="payout-reason-tag">${trigger}</span>
+      </div>`;
+            }).join('');
+          }
         }
+
         if (totalEl) {
-          const total = claims.reduce((s, c) => s + c.amount, 0);
-          totalEl.textContent = '₹' + total.toLocaleString() + ' total';
+          const total = claims.reduce((s, c) => s + (Number(c.amount) || 0), 0);
+          totalEl.textContent = '₹' + total.toLocaleString('en-IN') + ' total';
         }
       }
 
-      async function loadMoreClaims() {
-        await buildPayoutHistory();
+      async function loadMoreClaims(btn) {
+        const button = btn || null;
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Refreshing...';
+        }
+        try {
+          await buildPayoutHistory();
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = '↺ Refresh';
+          }
+        }
       }
 
       async function buildForecastStrip() {
@@ -4621,6 +4701,7 @@
         const conds = document.getElementById('liveConditions');
         const status = document.getElementById('liveStatus');
         if (!block || !conds) return;
+        syncMapToWorkerZone(false);
 
         // Use real data if available, else fall through to simulation
         if (data && data.triggers) {
@@ -4628,17 +4709,23 @@
           const temp = data.triggers.temperature.value;
           const aqi = data.triggers.aqi.value;
           const rainMet = data.triggers.rainfall.met;
-          const rainApp = rain >= 10 && !rainMet;
+          const rainThreshold = data.triggers.rainfall.threshold || 15;
+          const rainApp = rain >= Math.max(0, rainThreshold - 5) && !rainMet;
+          const zoneRisk = (data.zone?.riskLevel || workerData?.riskTier || 'medium').toUpperCase();
+          const zoneStatus = data.trigger_state === 'triggered' ? 'ALERT' : data.trigger_state === 'approaching' ? 'MONITORING' : 'CLEAR';
+          const zoneRiskBadge = zoneRisk === 'CRITICAL' ? 'met' : zoneRisk === 'HIGH' ? 'approaching' : zoneRisk === 'MEDIUM' ? 'normal' : 'good';
+          const zoneStatusBadge = data.trigger_state === 'triggered' ? 'met' : data.trigger_state === 'approaching' ? 'approaching' : 'low';
           const src = (data.source === 'open-meteo' || data.weather_source === 'open-meteo')
             ? 'Open-Meteo · live' : 'Simulated';
 
           block.className = 'live-block ' + (data.trigger_state === 'triggered' ? 'triggered' : data.trigger_state === 'approaching' ? 'approaching' : '');
 
           conds.innerHTML = `
-          <div class="cond-row"><span class="cond-metric">Rainfall</span><span class="cond-value">${rain}mm/hr</span><span class="cond-badge ${rainMet ? 'met' : rainApp ? 'approaching' : 'low'}">${rainMet ? 'TRIGGER ✓' : rainApp ? 'APPROACHING ⚠' : 'LOW'}</span></div>
+          <div class="cond-row"><span class="cond-metric">Rainfall</span><span class="cond-value">${rain}mm/hr</span><span class="cond-badge ${rainMet ? 'met' : rainApp ? 'approaching' : 'low'}">${rainMet ? 'TRIGGER ✓' : rainApp ? 'APPROACHING ⚠' : 'LOW'} · th ${rainThreshold}</span></div>
           <div class="cond-row"><span class="cond-metric">Temperature</span><span class="cond-value">${temp}°C</span><span class="cond-badge ${temp >= 42 ? 'met' : 'normal'}">${temp >= 42 ? 'TRIGGER ✓' : 'NORMAL'}</span></div>
           <div class="cond-row"><span class="cond-metric">AQI (proxy)</span><span class="cond-value">${aqi}</span><span class="cond-badge ${aqi >= 300 ? 'met' : aqi >= 200 ? 'approaching' : 'good'}">${aqi >= 300 ? 'TRIGGER ✓' : aqi >= 200 ? 'HIGH' : 'GOOD'}</span></div>
-          <div class="cond-row"><span class="cond-metric">Zone status</span><span class="cond-value">OPEN</span><span class="cond-badge low">CLEAR</span></div>
+          <div class="cond-row"><span class="cond-metric">Zone risk</span><span class="cond-value">${zoneRisk}</span><span class="cond-badge ${zoneRiskBadge}">${zoneRisk}</span></div>
+          <div class="cond-row"><span class="cond-metric">Zone status</span><span class="cond-value">${zoneStatus}</span><span class="cond-badge ${zoneStatusBadge}">${zoneStatus}</span></div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;">${src} · updated ${new Date(data.last_updated).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>`;
 
           if (status) {
@@ -4647,7 +4734,7 @@
               const payoutPool = [310, 295, 282, 318, 275, 302, 288];
               showClaimAnimation(payoutPool[sessionClaimCount % payoutPool.length]);
             } else if (data.trigger_state === 'approaching') {
-              status.textContent = `Monitoring. ${rain}mm/hr — threshold: 15mm/hr`;
+              status.textContent = `Monitoring. ${rain}mm/hr — threshold: ${rainThreshold}mm/hr`;
               status.style.color = 'var(--warn)';
             } else {
               status.textContent = 'No active triggers. Conditions normal.';
@@ -4660,8 +4747,9 @@
           if (dot) dot.className = 'zone-dot ' + (data.trigger_state === 'triggered' ? 'red' : data.trigger_state === 'approaching' ? 'amber' : 'green');
 
           // Update map rain overlay
-          if (typeof mapOverlays !== 'undefined' && mapOverlays.rainAdyar) {
-            mapOverlays.rainAdyar.setRadius(rainMet ? 2200 : rainApp ? 1400 : 0);
+          const rainOverlay = mapOverlays.rainZone || mapOverlays.rainAdyar;
+          if (rainOverlay) {
+            rainOverlay.setRadius(rainMet ? 2200 : rainApp ? 1400 : 0);
           }
           return; // used real data, skip simulation fallback
         }
@@ -4684,6 +4772,7 @@
         const conds = document.getElementById('liveConditions');
         const statusEl = document.getElementById('liveStatus');
         if (!block || !conds) return;
+        syncMapToWorkerZone(false);
         const rainMet = state.rainfall >= 15;
         const rainApproach = state.rainfall >= 10 && !rainMet;
         block.className = 'live-block ' + (state.status === 'triggered' ? 'triggered' : state.status === 'approaching' ? 'approaching' : '');
@@ -4703,8 +4792,9 @@
         } else {
           if (statusEl) { statusEl.textContent = 'No active triggers. Conditions normal.'; statusEl.style.color = 'var(--text-muted)'; }
         }
-        if (typeof mapOverlays !== 'undefined' && mapOverlays.rainAdyar) {
-          mapOverlays.rainAdyar.setRadius(state.rainfall >= 15 ? 1800 : state.rainfall >= 10 ? 1200 : 0);
+        const rainOverlay = mapOverlays.rainZone || mapOverlays.rainAdyar;
+        if (rainOverlay) {
+          rainOverlay.setRadius(state.rainfall >= 15 ? 1800 : state.rainfall >= 10 ? 1200 : 0);
         }
         const dot = document.getElementById('topbarZoneDot');
         if (dot) { dot.className = 'zone-dot ' + (state.status === 'triggered' ? 'red' : state.status === 'approaching' ? 'amber' : 'green'); }
@@ -4775,6 +4865,18 @@
         setTimeout(() => {
           const result = document.getElementById('ctResult');
           if (result) { result.style.opacity = '1'; result.innerHTML = `<div class="ct-result">→ ₹${payout} sent to UPI ****4821 · ${timeStr} IST</div>`; }
+          const simulatedClaim = {
+            id: 'SIM-' + Date.now(),
+            date: new Date().toISOString().split('T')[0],
+            shift: 'Dinner',
+            trigger: 'Rain',
+            amount: payout,
+            status: 'paid',
+            source: 'simulation'
+          };
+          sessionPayoutHistory = [simulatedClaim, ...sessionPayoutHistory].slice(0, 24);
+          saveSession();
+          buildPayoutHistory();
         }, 4000);
       }
 
@@ -4800,6 +4902,41 @@
       let mapOverlays = {};
       let mapResizeObserver = null;
       let mapZoneBounds = null;
+      function getActiveWorkerZoneKey() {
+        const wk = workerData?.zone;
+        if (wk && ZONE_COORDS[wk]) return wk;
+        const detected = window._workerCoords?.detectedZone;
+        if (detected && ZONE_COORDS[detected]) return detected;
+        return 'adyar';
+      }
+
+      function buildWorkerMarkerIcon() {
+        const workerName = (currentUser?.name?.split(' ')[0] || 'WORKER').toUpperCase();
+        const workerHtml = `<div class="worker-marker-content" style="position:relative;">
+        <div class="worker-marker-pulse"></div>
+        <div class="worker-marker-text">${workerName}</div>
+      </div>`;
+        return L.divIcon({ className: 'worker-marker', html: workerHtml, iconSize: [40, 40], iconAnchor: [20, 15] });
+      }
+
+      function syncMapToWorkerZone(recenter = false) {
+        if (!lmap) return;
+        const zoneKey = getActiveWorkerZoneKey();
+        const zoneCoords = ZONE_COORDS[zoneKey] || ZONE_COORDS.adyar;
+        const latLng = [zoneCoords.lat, zoneCoords.lon];
+
+        if (mapOverlays.workerMarker) {
+          mapOverlays.workerMarker.setLatLng(latLng);
+          mapOverlays.workerMarker.setIcon(buildWorkerMarkerIcon());
+        }
+        const rainOverlay = mapOverlays.rainZone || mapOverlays.rainAdyar;
+        if (rainOverlay) rainOverlay.setLatLng(latLng);
+
+        if (recenter) {
+          lmap.panTo(latLng, { animate: false });
+          refreshLeafletSize();
+        }
+      }
 
       function refreshLeafletSize() {
         if (!lmap) return;
@@ -4948,20 +5085,15 @@
         }
         window.addEventListener('resize', refreshLeafletSize);
 
-        // Dynamic worker marker — uses actual zone, not hardcoded Adyar
-        const workerZone = workerData?.zone || 'adyar';
+        // Dynamic worker marker + rain overlay tied to current worker zone.
+        const workerZone = getActiveWorkerZoneKey();
         const workerCoords = ZONE_COORDS[workerZone] || ZONE_COORDS.adyar;
-        const workerName = (currentUser?.name?.split(' ')[0] || 'RAVI').toUpperCase();
-        const workerHtml = `<div class="worker-marker-content" style="position:relative;">
-        <div class="worker-marker-pulse"></div>
-        <div class="worker-marker-text">${workerName}</div>
-      </div>`;
-        L.marker([workerCoords.lat, workerCoords.lon], {
-          icon: L.divIcon({ className: 'worker-marker', html: workerHtml, iconSize: [40, 40], iconAnchor: [20, 15] }),
+        mapOverlays.workerMarker = L.marker([workerCoords.lat, workerCoords.lon], {
+          icon: buildWorkerMarkerIcon(),
           interactive: false
         }).addTo(lmap);
 
-        mapOverlays.rainAdyar = L.circle([workerCoords.lat, workerCoords.lon], {
+        mapOverlays.rainZone = L.circle([workerCoords.lat, workerCoords.lon], {
           radius: 0,
           color: 'rgba(80,130,200,0.4)',
           weight: 2,
@@ -4969,6 +5101,8 @@
           fillOpacity: 1,
           dashArray: '5, 5'
         }).addTo(lmap);
+        // Backward-compatible alias for older references.
+        mapOverlays.rainAdyar = mapOverlays.rainZone;
 
         updateMapTimestamp();
 
@@ -5006,8 +5140,9 @@
         if (typeof mapOverlays === 'undefined') return;
 
         // Weather overlay — show/hide rain circle
-        if (mapOverlays.rainAdyar) {
-          mapOverlays.rainAdyar.setStyle({
+        const rainOverlay = mapOverlays.rainZone || mapOverlays.rainAdyar;
+        if (rainOverlay) {
+          rainOverlay.setStyle({
             color: layer === 'weather' ? 'rgba(80,130,200,0.4)' : 'rgba(80,130,200,0)',
             fillColor: layer === 'weather' ? 'rgba(80,130,200,0.1)' : 'rgba(80,130,200,0)',
             opacity: layer === 'weather' ? 1 : 0,
@@ -5036,16 +5171,21 @@
         const tip = document.getElementById('zoneTooltip');
         if (!tip) return;
         const riskColor = risk === 'CRITICAL' ? 'var(--danger)' : risk === 'HIGH' ? 'var(--warn)' : risk === 'MONITORING' ? 'var(--accent)' : 'var(--success)';
-        const triggerActive = risk === 'CRITICAL' || risk === 'HIGH';
         // Pull latest weather from cache if available
         const zoneKey = name.toLowerCase().replace('. ', '').replace(' ', '');
         const cached = window._weatherCache && window._weatherCache[zoneKey];
-        const rainfallLine = cached ? `<div class="sb-row"><span class="sb-key">Rainfall now</span><span class="sb-val mono" style="color:${cached.rainfall_mm_hr >= 15 ? 'var(--danger)' : cached.rainfall_mm_hr >= 10 ? 'var(--warn)' : 'var(--success)'}">${cached.rainfall_mm_hr}mm/hr</span></div>` : '';
-        const sourceLine = cached ? `<div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;">${cached.source === 'open-meteo' ? '🌐 Open-Meteo · live' : '⚡ Simulated'}</div>` : '';
+        const rainNow = cached?.triggers?.rainfall?.value ?? cached?.rainfall_mm_hr;
+        const rainThreshold = cached?.triggers?.rainfall?.threshold ?? 15;
+        const rainMet = cached?.triggers?.rainfall?.met ?? (Number.isFinite(rainNow) ? rainNow >= rainThreshold : false);
+        const triggerActive = !!rainMet;
+        const triggerText = cached ? (triggerActive ? 'YES' : 'NO') : 'CHECKING';
+        const triggerColor = !cached ? 'var(--text-muted)' : triggerActive ? 'var(--warn)' : 'var(--success)';
+        const rainfallLine = Number.isFinite(rainNow) ? `<div class="sb-row"><span class="sb-key">Rainfall now</span><span class="sb-val mono" style="color:${rainMet ? 'var(--danger)' : rainNow >= Math.max(0, rainThreshold - 5) ? 'var(--warn)' : 'var(--success)'}">${rainNow}mm/hr · th ${rainThreshold}</span></div>` : '';
+        const sourceLine = cached ? `<div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;">${(cached.weather_source === 'open-meteo' || cached.source === 'open-meteo') ? '🌐 Open-Meteo · live' : '⚡ Simulated'}</div>` : '';
         tip.innerHTML = `
         <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:0.75rem;color:var(--text-primary)">${name}</div>
         <div class="sb-row"><span class="sb-key">Risk level</span><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:${riskColor};font-weight:700">${risk}</span></div>
-        <div class="sb-row"><span class="sb-key">Trigger active</span><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:${triggerActive ? 'var(--warn)' : 'var(--success)'}">${triggerActive ? 'YES' : 'NO'}</span></div>
+        <div class="sb-row"><span class="sb-key">Trigger active</span><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:${triggerColor}">${triggerText}</span></div>
         ${rainfallLine}
         <div class="sb-row"><span class="sb-key">Your coverage</span><span class="sb-val" style="color:var(--success)">Active</span></div>
         <div class="sb-row"><span class="sb-key">Est. payout</span><span class="sb-val" style="color:var(--accent)">${payout}</span></div>
@@ -5087,12 +5227,22 @@
         if (text) { text.textContent = 'Checking conditions...'; text.style.color = 'var(--text-muted)'; }
         if (detail) detail.textContent = 'Querying live conditions from backend...';
         const wid = workerId || 'W-2947';
-        const res = await apiPost('/api/worker/' + wid + '/covered-check', { zone: workerData?.zone || 'adyar', shift: 'dinner' });
+        const res = await apiPost('/api/worker/' + wid + '/covered-check', { zone: workerData?.zone || 'adyar', shift: 'dinner' }, 10000);
         if (res) {
           if (res.status === 'covered') {
             if (icon) icon.textContent = '✓';
             if (text) { text.textContent = 'Yes — both conditions met.'; text.style.color = 'var(--success)'; }
-            if (detail) detail.textContent = `Payout would be ₹${res.estimated_payout}. Transfer initiating now.`;
+            if (detail) {
+              const ai3Line = res.ai3 ? ` AI-3: ${res.ai3.peer_low_activity_pct}% peers low-activity (${res.ai3.peer_sample_size} sample).` : '';
+              detail.textContent = `Payout would be ₹${res.estimated_payout}. Transfer initiating now.${ai3Line}`;
+            }
+          } else if (res.status === 'reviewing') {
+            if (icon) icon.textContent = '⏸';
+            if (text) { text.textContent = 'Trigger met — AI-3 review in progress.'; text.style.color = 'var(--warn)'; }
+            if (detail) {
+              const ai3Line = res.ai3 ? ` Peer low-activity: ${res.ai3.peer_low_activity_pct}% (${res.ai3.peer_sample_size}).` : '';
+              detail.textContent = (res.message || 'Payout temporarily held for fraud review.') + ai3Line;
+            }
           } else if (res.status === 'monitoring' || res.status === 'approaching') {
             if (icon) icon.textContent = '⚠';
             if (text) { text.textContent = 'Not yet — monitoring.'; text.style.color = 'var(--warn)'; }
@@ -5262,14 +5412,23 @@ If peers are working normally → soft flag → 2-hour automated grace review.`;
           const response = await apiPost('/api/ai/chat', {
             system: buildAISystemPrompt(),
             messages: aiChatHistory,
-          });
-          const reply = response?.reply || 'Something went wrong. Please try again.';
+          }, 15000);
+          if (!response || !response.reply) {
+            removeThinking();
+            const timeoutReply = 'The AI service took too long to respond. Please try again.';
+            aiChatHistory.push({ role: 'assistant', content: timeoutReply });
+            addAIMessage('bot', timeoutReply);
+            return;
+          }
+          const reply = response.reply;
           removeThinking();
           aiChatHistory.push({ role: 'assistant', content: reply });
           addAIMessage('bot', reply);
         } catch (err) {
           removeThinking();
-          addAIMessage('bot', 'Could not reach the AI service right now. Make sure the backend server is running (node server.js).');
+          const fallbackReply = 'Could not reach the AI service right now. Make sure the backend server is running (node server.js).';
+          aiChatHistory.push({ role: 'assistant', content: fallbackReply });
+          addAIMessage('bot', fallbackReply);
         }
       }
 

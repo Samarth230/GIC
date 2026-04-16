@@ -44,11 +44,22 @@ function generatePremiumTrainingData() {
 }
 
 function generateFraudTrainingData() {
+  // Structured training: peerDiv (0) is the dominant fraud signal, newAcct (1) and
+  // claimFreq (2) are secondary, rainGap (3) and temporal (4) are weaker signals.
+  // This mirrors the actual feature semantics in mlFraudCheck.
   const data = [];
   for (let i = 0; i < 800; i++) {
-    const features = [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()];
-    const score = features[0] * 0.30 + features[1] * 0.20 + features[2] * 0.22 + features[3] * 0.16 + features[4] * 0.12 + (Math.random() - 0.5) * 0.06;
-    data.push({ input: features, output: [Math.max(0, Math.min(1, score))] });
+    const peerDiv    = Math.random();
+    const newAcct    = Math.random();
+    const claimFreq  = Math.random();
+    const rainGap    = Math.random();
+    const temporal   = Math.random();
+    const score = peerDiv * 0.35 + newAcct * 0.20 + claimFreq * 0.20
+                + rainGap * 0.15 + temporal * 0.10 + (Math.random() - 0.5) * 0.04;
+    data.push({
+      input: [peerDiv, newAcct, claimFreq, rainGap, temporal],
+      output: [Math.max(0, Math.min(1, score))]
+    });
   }
   return data;
 }
