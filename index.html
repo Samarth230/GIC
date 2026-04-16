@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GIC — Gig Income Coverage</title>
   <!-- PWA meta — makes the app installable on Android/iOS home screen -->
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#C8A96E">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1446,27 +1446,30 @@
 
     /* ─── DASHBOARD LAYOUT ─── */
     .dash-body {
-      display: flex;
-      flex: 1;
+      display: grid;
+      grid-template-columns: 250px minmax(560px, 1fr) 300px;
       overflow: hidden;
       height: calc(100vh - 56px);
+      flex: 1;
+      min-height: 0;
+      align-items: stretch;
     }
 
     /* Left sidebar: worker info + AI QnA */
     .dash-sidebar {
-      width: 260px;
-      min-width: 240px;
       background: var(--bg-surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-width: 0;
+      grid-column: 1;
     }
 
     .sidebar-top {
       padding: 1.25rem;
       overflow-y: auto;
-      flex-shrink: 0;
+      flex: 1;
       border-bottom: 1px solid var(--border);
     }
 
@@ -1479,24 +1482,25 @@
 
     /* Center: Map */
     .dash-map-area {
-      flex: 1;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      grid-column: 2;
     }
 
     /* Right: premium + payout panels */
     .dash-right {
-      width: 250px;
-      min-width: 220px;
-      max-width: 280px;
       background: var(--bg-surface);
       border-left: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      flex-shrink: 0;
+      min-width: 0;
+      min-height: 0;
+      grid-column: 3;
     }
 
     /* ─── SIDEBAR COMPONENTS ─── */
@@ -1903,7 +1907,8 @@
       position: relative;
       background: #0E0D09;
       overflow: hidden;
-      min-height: 400px;
+      min-height: 460px;
+      height: auto;
     }
 
     /* ─── LEAFLET OVERRIDES ─── */
@@ -2475,24 +2480,18 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 1100px) {
-      .dash-right {
-        width: 240px;
-        min-width: 240px;
+      .dash-body {
+        grid-template-columns: 220px minmax(480px, 1fr) 260px;
       }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 920px) {
       .nav-center {
         display: none;
       }
 
-      .dash-right {
-        display: none;
-      }
-
-      .dash-sidebar {
-        width: 260px;
-        min-width: 260px;
+      .dash-body {
+        grid-template-columns: 220px minmax(0, 1fr) 240px;
       }
     }
 
@@ -2521,6 +2520,10 @@
         gap: 1.5rem;
       }
 
+      .dash-body {
+        grid-template-columns: 1fr;
+      }
+
       .dash-sidebar {
         display: none;
       }
@@ -2531,6 +2534,10 @@
         inset: 56px 0 0;
         z-index: 40;
         width: 100%;
+      }
+
+      .dash-right {
+        display: none;
       }
     }
   </style>
@@ -2604,7 +2611,7 @@
         </div>
         <div class="onboard-step" id="ostep4">
           <div class="onboard-tag">04 — Weekly Premium</div>
-          <div class="onboard-title" id="os4title">You pay ₹39–89 per week.</div>
+          <div class="onboard-title" id="os4title">You pay ₹29–89 per week.</div>
           <div class="onboard-text" id="os4text">It adjusts automatically every Sunday.
             Based on your zone, your history, and next week's forecast.
 
@@ -2613,7 +2620,7 @@
             <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-muted);">
               <div
                 style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border)">
-                <span>Base premium</span><span>₹79</span>
+                <span>Base premium</span><span>₹29</span>
               </div>
               <div
                 style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border)">
@@ -2629,7 +2636,7 @@
               </div>
               <div
                 style="display:flex;justify-content:space-between;padding:0.4rem 0;font-weight:700;color:var(--accent)">
-                <span>This week</span><span>₹83</span>
+                <span>This week</span><span>₹63</span>
               </div>
             </div>
           </div>
@@ -2817,7 +2824,7 @@
           </div>
         </div>
         <div class="hero-stats">
-          <div class="stat-item"><span class="stat-val">₹39</span><span class="stat-label" id="stat1label">Starting
+          <div class="stat-item"><span class="stat-val">₹29</span><span class="stat-label" id="stat1label">Starting
               weekly premium</span></div>
           <div class="stat-item"><span class="stat-val">4<span style="font-size:1rem">min</span></span><span
               class="stat-label" id="stat2label">Average payout time</span></div>
@@ -3015,19 +3022,19 @@
         <h2 class="section-headline">A rider benefit that costs platforms almost nothing</h2>
         <div class="platform-model">
           <div class="pm-box">
-            <div class="pm-amount" style="color:var(--text-secondary)">₹60</div>
+            <div class="pm-amount" style="color:var(--text-secondary)">₹19</div>
             <div class="pm-who">Worker contribution</div>
           </div>
           <div style="text-align:center">
             <div class="pm-plus">+</div>
           </div>
           <div class="pm-box">
-            <div class="pm-amount" style="color:var(--accent)">₹23</div>
+            <div class="pm-amount" style="color:var(--accent)">₹20</div>
             <div class="pm-who">Platform subsidy (optional)</div>
           </div>
         </div>
         <div style="text-align:center;margin-top:1.5rem"><span class="mono"
-            style="font-size:1.1rem;color:var(--accent)">= ₹83/week full coverage · ₹23 per worker per week to retain
+            style="font-size:1.1rem;color:var(--accent)">= ₹39/week full coverage · ₹20 per worker per week to retain
             talent</span></div>
       </div>
     </section>
@@ -3043,15 +3050,15 @@
           </div>
           <div class="tech-row">
             <div class="tech-label">Backend</div>
-            <div class="tech-value">Node.js · Express · In-memory (Phase 2)</div>
+            <div class="tech-value">Node.js · Express · MongoDB Atlas (Phase 3)</div>
           </div>
           <div class="tech-row">
             <div class="tech-label">ML / AI</div>
-            <div class="tech-value">Rule-based weighted scoring → GBT (future)</div>
+            <div class="tech-value">brain.js Neural Networks · 4 models (premium, fraud, churn, forecast)</div>
           </div>
           <div class="tech-row">
             <div class="tech-label">Weather</div>
-            <div class="tech-value">OpenWeather API (live + mock fallback)</div>
+            <div class="tech-value">Open-Meteo API (live) · WAQI AQI</div>
           </div>
           <div class="tech-row">
             <div class="tech-label">Payments</div>
@@ -3136,7 +3143,7 @@
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
                 <span style="font-size:0.78rem;color:var(--text-muted);">This week's premium</span>
                 <span id="premiumAmtBadge"
-                  style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:var(--accent);font-weight:700;">₹83</span>
+                  style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:var(--accent);font-weight:700;">₹63</span>
               </div>
               <div id="paymentStatus"
                 style="display:none;font-size:0.72rem;color:var(--success);margin-bottom:0.4rem;font-family:'JetBrains Mono',monospace;">
@@ -3156,6 +3163,15 @@
             <div class="sb-label">⬤ LIVE — YOUR ZONE</div>
             <div id="liveConditions"></div>
             <div id="liveStatus" style="font-size:0.72rem;color:var(--text-muted);margin-top:0.5rem;"></div>
+          </div>
+
+          <!-- System Status (moved from right panel) -->
+          <div class="sidebar-block" style="margin-top:0.75rem;">
+            <div class="sb-label">System Status</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-secondary);">
+              <span class="api-status-dot api-loading" id="apiDot"></span>
+              <span id="apiStatusText">Checking...</span>
+            </div>
           </div>
 
           <!-- Claim animation -->
@@ -3253,7 +3269,7 @@
             <div class="admin-stat">
               <div class="admin-stat-val" style="color:var(--success)" id="astat-gpw">₹2.24L</div>
               <div class="admin-stat-label">Weekly GPW</div>
-              <div class="admin-stat-change">₹79 avg/worker</div>
+              <div class="admin-stat-change">₹63 avg/worker</div>
             </div>
             <div class="admin-stat">
               <div class="admin-stat-val" style="color:var(--warn)" id="astat-bcr">0.62</div>
@@ -3343,7 +3359,7 @@
                   <div
                     style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid var(--border)">
                     <span style="color:var(--text-muted)">Output floor / ceiling</span><span
-                      style="color:var(--accent)">₹39 / ₹89</span></div>
+                      style="color:var(--accent)">₹29 / ₹89</span></div>
                   <div style="display:flex;justify-content:space-between;padding:0.3rem 0;"><span
                       style="color:var(--text-muted)">Model version</span><span
                       style="color:var(--accent)">GIC-WS-v3.0</span></div>
@@ -3486,14 +3502,7 @@
         <!-- ── RIGHT PANEL: Premium + Payouts ── -->
         <div class="dash-right" id="dashRight">
 
-          <!-- API connection status -->
-          <div class="right-panel-section">
-            <div class="rp-title">System Status</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-secondary);">
-              <span class="api-status-dot api-loading" id="apiDot"></span>
-              <span id="apiStatusText">Checking...</span>
-            </div>
-          </div>
+          <!-- API connection status (moved to left sidebar) -->
 
           <!-- Weekly Premium — separate from map -->
           <div class="right-panel-section">
@@ -3511,7 +3520,7 @@
                   style="color:var(--text-muted)">Forecast</span><span id="rpForecastVal">—</span></div>
             </div>
             <div style="font-size:0.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">
-              Floor ₹39 · Ceiling ₹89 · BCR target 0.55–0.70
+              Floor ₹29 · Ceiling ₹89 · BCR target 0.55–0.70
             </div>
           </div>
 
@@ -3572,7 +3581,7 @@
           <div class="faq-q">How is my premium calculated?</div>
           <div class="faq-a">Your premium recalculates every Sunday based on your zone's risk history, your personal
             claim
-            history, the forecast for next week, and your activity tier. Floor: ₹39. Ceiling: ₹89.</div>
+            history, the forecast for next week, and your activity tier. Floor: ₹29. Ceiling: ₹89.</div>
         </div>
         <div class="faq-card" onclick="this.classList.toggle('open')">
           <div class="faq-q">What is AI-3?</div>
@@ -3610,17 +3619,59 @@
       let claimFired = false;
       let sessionClaimCount = 0; // tracks total trigger fires this session — drives payout variety
       let calcAnswers = {};
+      const SESSION_KEY = 'gic_session_v1';
+
+      function saveSession() {
+        try {
+          const payload = {
+            currentUser,
+            isAdmin,
+            workerId,
+            workerData,
+            policyData
+          };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+        } catch (e) { }
+      }
+
+      function clearSession() {
+        try { localStorage.removeItem(SESSION_KEY); } catch (e) { }
+      }
+
+      function restoreSession() {
+        try {
+          const raw = localStorage.getItem(SESSION_KEY);
+          if (!raw) return false;
+          const saved = JSON.parse(raw);
+          currentUser = saved.currentUser || null;
+          isAdmin = !!saved.isAdmin;
+          workerId = saved.workerId || saved.currentUser?.id || null;
+          workerData = saved.workerData || null;
+          policyData = saved.policyData || null;
+          return !!currentUser;
+        } catch (e) {
+          clearSession();
+          return false;
+        }
+      }
 
       // ─── API HELPERS ───
       async function apiFetch(path, opts = {}) {
+        const controller = new AbortController();
+        const timeoutMs = opts.timeoutMs || 4500;
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
         try {
+          const { timeoutMs: _timeoutMs, ...fetchOpts } = opts;
           const r = await fetch(API_BASE + path, {
-            ...opts,
+            ...fetchOpts,
+            signal: controller.signal,
             headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) }
           });
           return await r.json();
         } catch (e) {
           return null;
+        } finally {
+          clearTimeout(timeout);
         }
       }
 
@@ -3656,7 +3707,7 @@
           os2text: '1. Is there a real disruption in your zone?\n   (rain, heat, AQI, curfew)\n\n2. Has your earning activity actually dropped?\n   (compared to your last 4 weeks)\n\nBoth have to be true.\nIf they are — you get paid. Automatically.',
           os3title: 'Watch what happens next.',
           os3caption: 'Ravi did not file a claim. He did not call anyone. He got a notification.',
-          os4title: 'You pay ₹39–89 per week.',
+          os4title: 'You pay ₹29–89 per week.',
           os4text: 'It adjusts automatically every Sunday.\nBased on your zone, your history, and next week\'s forecast.\n\nYou never renew manually. It never lapses.',
         },
         hi: {
@@ -3666,7 +3717,7 @@
           os2text: '1. क्या आपके ज़ोन में कोई असली रुकावट है?\n   (बारिश, गर्मी, AQI, कर्फ्यू)\n\n2. क्या आपकी कमाई वाकई कम हुई है?\n   (आपके पिछले 4 हफ्तों की तुलना में)\n\nदोनों सच होने चाहिए।\nअगर हैं — आपको भुगतान मिलेगा। अपने आप।',
           os3title: 'देखिए आगे क्या होता है।',
           os3caption: 'रवि ने कोई दावा नहीं किया। किसी को फ़ोन नहीं किया। बस एक नोटिफ़िकेशन आई।',
-          os4title: 'आप ₹39–89 प्रति सप्ताह देते हैं।',
+          os4title: 'आप ₹29–89 प्रति सप्ताह देते हैं।',
           os4text: 'यह हर रविवार अपने आप अपडेट होता है।\nआपके ज़ोन, इतिहास और अगले हफ्ते के पूर्वानुमान के आधार पर।\n\nआपको कभी मैन्युअल रूप से नवीनीकरण नहीं करना होगा।',
         }
       };
@@ -3956,11 +4007,13 @@
             workerId = 'W-2947';
             workerData = workerRes;
             currentUser = { name: workerRes.name, platform: workerRes.platform, upi: workerRes.upi, id: workerRes.id };
+            saveSession();
             closeAuth();
             showDashboard(false);
           } else {
             currentUser = { name: 'Ravi', platform: 'swiggy', upi: '****4821', id: 'W-2947' };
             workerId = 'W-2947';
+            saveSession();
             closeAuth();
             showDashboard(false);
           }
@@ -3968,6 +4021,7 @@
           workerId = res.worker?.id;
           workerData = res.worker;
           currentUser = { name: res.worker?.name || 'Worker', platform: res.worker?.platform, upi: res.worker?.upi, id: workerId };
+          saveSession();
           closeAuth();
           showDashboard(false);
         } else {
@@ -4006,19 +4060,23 @@
           };
           currentUser = { name, platform, upi, id: workerId };
         }
+        saveSession();
         closeAuth();
         showDashboard(false);
       }
       function adminLogin() {
         isAdmin = true;
         currentUser = { name: 'Admin', role: 'admin' };
+        saveSession();
         closeAuth();
         showDashboard(true);
       }
       function logout() {
         currentUser = null; isAdmin = false; workerId = null; workerData = null;
+        policyData = null;
         simulationRunning = false;
         if (simulTimer) clearTimeout(simulTimer);
+        clearSession();
         document.getElementById('dashboard').classList.remove('active');
         document.getElementById('landing').style.display = 'block';
         document.body.style.overflow = '';
@@ -4253,103 +4311,136 @@
         <div class="skeleton skeleton-line" style="width:70%"></div>
         <div class="skeleton skeleton-line" style="width:90%"></div>`;
 
+        initLeafletMap();
+        buildRiskStrip();
+        buildLiveConditions();
+        startLiveSimulation();
+
         await loadWorkerData();
         buildRiskStrip();
         buildLiveConditions();
-        buildPayoutHistory();
-        buildForecastStrip();
-        initLeafletMap();
-        startLiveSimulation();
+
+        await Promise.allSettled([
+          buildPayoutHistory(),
+          buildForecastStrip(),
+          loadSafeChoice()
+        ]);
 
         if (adminMode) {
           loadAdminStats();
           loadFraudFlags();
         }
 
-        loadSafeChoice();
-
         initAIChat();
       }
 
       async function loadWorkerData() {
         const wid = workerId || 'W-2947';
-        const [worker, policy, churn] = await Promise.all([
-          apiFetch('/api/worker/' + wid),
-          apiFetch('/api/worker/' + wid + '/policy'),
-          apiFetch('/api/ai/churn-prediction/' + wid)
-        ]);
-        // Use API data or fallback so UI is never left blank with skeletons
-        const w = worker || workerData || {
-          id: wid, name: currentUser?.name || 'Ravi Kumar',
-          platform: currentUser?.platform || 'swiggy',
-          zone: 'adyar', zoneId: 14, coverageStatus: 'active',
-          streak: 4, riskTier: 'high', activeDays: 12,
-          baselineEarnings: { lunch: 175, dinner: 310, avg_orders_per_hr: 7.2 }
+        const fallbackWorker = {
+          id: wid,
+          name: currentUser?.name || workerData?.name || 'Ravi Kumar',
+          platform: currentUser?.platform || workerData?.platform || 'swiggy',
+          zone: typeof workerData?.zone === 'string' ? workerData.zone : 'adyar',
+          zoneId: workerData?.zoneId || (ZONE_COORDS[workerData?.zone || 'adyar']?.zoneId || 14),
+          coverageStatus: workerData?.coverageStatus || 'active',
+          streak: workerData?.streak || 4,
+          riskTier: workerData?.riskTier || 'high',
+          activeDays: workerData?.activeDays || 12,
+          baselineEarnings: workerData?.baselineEarnings || { lunch: 175, dinner: 310, avg_orders_per_hr: 7.2 }
         };
-        workerData = w;
-
-        const p = (policy && policy.id) ? policy : policyData || {
-          id: 'POL-2026-00001', workerId: wid,
-          weekStart: '2026-03-31', weekEnd: '2026-04-06',
-          premium: 63, status: 'active',
-          premiumBreakdown: { base: 29, zoneAdj: 12, streakDiscount: -16, forecastSurcharge: 8 },
-          windows: [{ type: 'lunch', start: '12:00', end: '14:00' }, { type: 'dinner', start: '19:00', end: '22:00' }]
+        const fallbackPolicy = {
+          id: policyData?.id || 'POL-2026-00001',
+          workerId: wid,
+          weekStart: policyData?.weekStart || '2026-03-31',
+          weekEnd: policyData?.weekEnd || '2026-04-06',
+          premium: policyData?.premium || 63,
+          status: policyData?.status || 'active',
+          premiumBreakdown: policyData?.premiumBreakdown || { base: 29, zoneAdj: 12, streakDiscount: -16, forecastSurcharge: 8 },
+          windows: policyData?.windows || [{ type: 'lunch', start: '12:00', end: '14:00' }, { type: 'dinner', start: '19:00', end: '22:00' }]
         };
-        policyData = p;
 
-        // Update greeting
-        const churnText = churn && churn.churn_probability !== undefined
-          ? ` · Churn Risk: ${(churn.churn_probability * 100).toFixed(0)}%` : '';
-        const sub = document.getElementById('greetingSub');
-        if (sub) sub.textContent = `${w.coverageStatus === 'active' ? 'Active' : 'Building baseline'} · ${w.zone.charAt(0).toUpperCase() + w.zone.slice(1)} Zone · Streak: ${w.streak}w${churnText}`;
+        const renderWorkerDashboard = (workerPayload, policyPayload, churnPayload) => {
+          const zoneKey = typeof workerPayload?.zone === 'string' ? workerPayload.zone : 'adyar';
+          const zoneLabel = zoneKey.charAt(0).toUpperCase() + zoneKey.slice(1);
+          const zoneId = workerPayload?.zoneId || ZONE_COORDS[zoneKey]?.zoneId || 14;
+          const streak = Number.isFinite(workerPayload?.streak) ? workerPayload.streak : 0;
+          const churnText = churnPayload && churnPayload.churn_probability !== undefined
+            ? ` · Churn Risk: ${(churnPayload.churn_probability * 100).toFixed(0)}%` : '';
 
-        // Update topbar zone
-        const tb = document.getElementById('topbarZoneName');
-        if (tb) tb.textContent = w.zone.charAt(0).toUpperCase() + w.zone.slice(1) + ' — Z' + w.zoneId;
+          workerData = {
+            ...fallbackWorker,
+            ...workerPayload,
+            zone: zoneKey,
+            zoneId
+          };
+          policyData = {
+            ...fallbackPolicy,
+            ...policyPayload,
+            premiumBreakdown: { ...fallbackPolicy.premiumBreakdown, ...(policyPayload?.premiumBreakdown || {}) }
+          };
+          saveSession();
 
-        // Rebuild policy block completely (skeleton loaders destroyed the original elements)
-        const policyBlock = document.getElementById('policyBlock');
-        if (policyBlock) {
-          policyBlock.innerHTML = `
-            <div class="sb-label">Active Policy</div>
-            <div class="sb-row"><span class="sb-key">Policy ID</span><span class="sb-val mono">${p.id}</span></div>
-            <div class="sb-row"><span class="sb-key">Coverage</span><span class="sb-val ${p.status === 'active' ? 'success' : 'warn'}">${p.status === 'active' ? 'Active ✓' : p.status}</span></div>
-            <div class="sb-row"><span class="sb-key">Valid until</span><span class="sb-val">${p.weekEnd}</span></div>
-            <div class="sb-row"><span class="sb-key">Windows</span><span class="sb-val">Lunch + Dinner</span></div>
-            <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-                <span style="font-size:0.78rem;color:var(--text-muted);">This week's premium</span>
-                <span id="premiumAmtBadge" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:var(--accent);font-weight:700;">₹${p.premium}</span>
-              </div>
-              <div id="paymentStatus" style="display:none;font-size:0.72rem;color:var(--success);margin-bottom:0.4rem;font-family:'JetBrains Mono',monospace;"></div>
-              <button id="payPremiumBtn" class="btn-primary" style="width:100%;font-size:0.8rem;padding:0.5rem;" onclick="openPayment()">Pay Premium →</button>
-              <div style="font-size:0.68rem;color:var(--text-muted);text-align:center;margin-top:0.35rem;">Secured via Razorpay · Test mode</div>
-            </div>`;
-        }
+          const sub = document.getElementById('greetingSub');
+          if (sub) sub.textContent = `${workerData.coverageStatus === 'active' ? 'Active' : 'Building baseline'} · ${zoneLabel} Zone · Streak: ${streak}w${churnText}`;
 
-        // Update right panel premium display
-        const rpAmt = document.getElementById('rpPremiumAmt');
-        if (rpAmt) rpAmt.textContent = '₹' + p.premium;
-        const bd = p.premiumBreakdown || {};
-        const baseEl = document.getElementById('rpBase');
-        if (baseEl) baseEl.textContent = '₹' + (bd.base || 29);
-        const zaVal = document.getElementById('rpZoneAdjVal');
-        if (zaVal) {
-          const adj = bd.zoneAdj || 0;
-          zaVal.textContent = (adj >= 0 ? '+' : '') + '₹' + adj;
-          zaVal.style.color = adj > 0 ? 'var(--warn)' : adj < 0 ? 'var(--success)' : 'var(--text-muted)';
-        }
-        const sdVal = document.getElementById('rpStreakDiscVal');
-        if (sdVal) {
-          const disc = bd.streakDiscount || 0;
-          sdVal.textContent = (disc >= 0 ? '+' : '') + '₹' + disc;
-          sdVal.style.color = disc < 0 ? 'var(--success)' : disc > 0 ? 'var(--warn)' : 'var(--text-muted)';
-        }
-        const fcVal = document.getElementById('rpForecastVal');
-        if (fcVal) {
-          const fc = bd.forecastSurcharge || 0;
-          fcVal.textContent = (fc >= 0 ? '+' : '') + '₹' + fc;
-          fcVal.style.color = fc > 0 ? 'var(--warn)' : fc < 0 ? 'var(--success)' : 'var(--text-muted)';
+          const tb = document.getElementById('topbarZoneName');
+          if (tb) tb.textContent = `${zoneLabel} — Z${zoneId}`;
+
+          const policyBlock = document.getElementById('policyBlock');
+          if (policyBlock) {
+            policyBlock.innerHTML = `
+              <div class="sb-label">Active Policy</div>
+              <div class="sb-row"><span class="sb-key">Policy ID</span><span class="sb-val mono">${policyData.id}</span></div>
+              <div class="sb-row"><span class="sb-key">Coverage</span><span class="sb-val ${policyData.status === 'active' ? 'success' : 'warn'}">${policyData.status === 'active' ? 'Active ✓' : policyData.status}</span></div>
+              <div class="sb-row"><span class="sb-key">Valid until</span><span class="sb-val">${policyData.weekEnd}</span></div>
+              <div class="sb-row"><span class="sb-key">Windows</span><span class="sb-val">Lunch + Dinner</span></div>
+              <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+                  <span style="font-size:0.78rem;color:var(--text-muted);">This week's premium</span>
+                  <span id="premiumAmtBadge" style="font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:var(--accent);font-weight:700;">₹${policyData.premium}</span>
+                </div>
+                <div id="paymentStatus" style="display:none;font-size:0.72rem;color:var(--success);margin-bottom:0.4rem;font-family:'JetBrains Mono',monospace;"></div>
+                <button id="payPremiumBtn" class="btn-primary" style="width:100%;font-size:0.8rem;padding:0.5rem;" onclick="openPayment()">Pay Premium →</button>
+                <div style="font-size:0.68rem;color:var(--text-muted);text-align:center;margin-top:0.35rem;">Secured via Razorpay · Test mode</div>
+              </div>`;
+          }
+
+          const bd = policyData.premiumBreakdown || fallbackPolicy.premiumBreakdown;
+          const rpAmt = document.getElementById('rpPremiumAmt');
+          if (rpAmt) rpAmt.textContent = '₹' + (policyData.premium || fallbackPolicy.premium);
+          const baseEl = document.getElementById('rpBase');
+          if (baseEl) baseEl.textContent = '₹' + (bd.base ?? 29);
+          const zaVal = document.getElementById('rpZoneAdjVal');
+          if (zaVal) {
+            const adj = bd.zoneAdj ?? 0;
+            zaVal.textContent = (adj >= 0 ? '+' : '') + '₹' + adj;
+            zaVal.style.color = adj > 0 ? 'var(--warn)' : adj < 0 ? 'var(--success)' : 'var(--text-muted)';
+          }
+          const sdVal = document.getElementById('rpStreakDiscVal');
+          if (sdVal) {
+            const disc = bd.streakDiscount ?? 0;
+            sdVal.textContent = (disc >= 0 ? '+' : '') + '₹' + disc;
+            sdVal.style.color = disc < 0 ? 'var(--success)' : disc > 0 ? 'var(--warn)' : 'var(--text-muted)';
+          }
+          const fcVal = document.getElementById('rpForecastVal');
+          if (fcVal) {
+            const fc = bd.forecastSurcharge ?? 0;
+            fcVal.textContent = (fc >= 0 ? '+' : '') + '₹' + fc;
+            fcVal.style.color = fc > 0 ? 'var(--warn)' : fc < 0 ? 'var(--success)' : 'var(--text-muted)';
+          }
+        };
+
+        renderWorkerDashboard(fallbackWorker, fallbackPolicy, null);
+
+        try {
+          const [worker, policy, churn] = await Promise.all([
+            apiFetch('/api/worker/' + wid),
+            apiFetch('/api/worker/' + wid + '/policy'),
+            apiFetch('/api/ai/churn-prediction/' + wid)
+          ]);
+          renderWorkerDashboard(worker || fallbackWorker, (policy && policy.id) ? policy : fallbackPolicy, churn);
+        } catch (e) {
+          renderWorkerDashboard(fallbackWorker, fallbackPolicy, null);
         }
       }
 
@@ -4553,7 +4644,8 @@
           if (status) {
             if (data.trigger_state === 'triggered') {
               status.innerHTML = '<span style="color:var(--success)">✓ Trigger met — AI chain running...</span>';
-              showClaimAnimation(310);
+              const payoutPool = [310, 295, 282, 318, 275, 302, 288];
+              showClaimAnimation(payoutPool[sessionClaimCount % payoutPool.length]);
             } else if (data.trigger_state === 'approaching') {
               status.textContent = `Monitoring. ${rain}mm/hr — threshold: 15mm/hr`;
               status.style.color = 'var(--warn)';
@@ -4706,17 +4798,36 @@
       // ─── LEAFLET MAP ───
       let lmap;
       let mapOverlays = {};
+      let mapResizeObserver = null;
+      let mapZoneBounds = null;
+
+      function refreshLeafletSize() {
+        if (!lmap) return;
+        requestAnimationFrame(() => {
+          if (!lmap) return;
+          lmap.invalidateSize(false);
+          if (mapZoneBounds) {
+            lmap.fitBounds(mapZoneBounds.pad(0.12), {
+              paddingTopLeft: [96, 24],
+              paddingBottomRight: [24, 24],
+              maxZoom: 13.25,
+              animate: false
+            });
+          }
+        });
+      }
 
       function initLeafletMap() {
         if (lmap) return; // already initialized
 
         lmap = L.map('chennaiMap', {
           zoomControl: false,
-          attributionControl: false
+          attributionControl: false,
+          zoomSnap: 0.25
         }).setView([13.02, 80.24], 12);
-        setTimeout(() => { if (lmap) lmap.invalidateSize(); }, 200);
-        setTimeout(() => { if (lmap) lmap.invalidateSize(); }, 600);
-        setTimeout(() => { if (lmap) lmap.invalidateSize(); }, 1200);
+        setTimeout(refreshLeafletSize, 200);
+        setTimeout(refreshLeafletSize, 600);
+        setTimeout(refreshLeafletSize, 1200);
 
         L.control.zoom({ position: 'bottomright' }).addTo(lmap);
 
@@ -4796,6 +4907,7 @@
             ]
           },
         ];
+        const zoneLayers = [];
 
         zones.forEach(z => {
           const poly = L.polygon(z.coords, {
@@ -4805,6 +4917,7 @@
             fillColor: z.color,
             fillOpacity: z.risk === 'LOW' ? 0.15 : 0.25
           }).addTo(lmap);
+          zoneLayers.push(poly);
 
           poly.on('mouseover', (e) => showZoneTip(z.name, z.risk, z.payout, z.policies, e.originalEvent));
           poly.on('mouseout', hideZoneTip);
@@ -4818,6 +4931,22 @@
             interactive: false
           }).addTo(lmap);
         });
+
+        if (zoneLayers.length) {
+          mapZoneBounds = L.featureGroup(zoneLayers).getBounds();
+          lmap.fitBounds(mapZoneBounds.pad(0.12), {
+            paddingTopLeft: [96, 24],
+            paddingBottomRight: [24, 24],
+            maxZoom: 13.25
+          });
+        }
+
+        const mapHost = document.getElementById('workerMap');
+        if (mapHost && typeof ResizeObserver !== 'undefined') {
+          mapResizeObserver = new ResizeObserver(() => refreshLeafletSize());
+          mapResizeObserver.observe(mapHost);
+        }
+        window.addEventListener('resize', refreshLeafletSize);
 
         // Dynamic worker marker — uses actual zone, not hardcoded Adyar
         const workerZone = workerData?.zone || 'adyar';
@@ -5164,7 +5293,11 @@ If peers are working normally → soft flag → 2-hour automated grace review.`;
         buildTimeline();
         document.getElementById('calcQ1').classList.add('visible');
         document.getElementById('calcOpts1').classList.add('visible');
-        if (!localStorage.getItem('gic_demo_seen')) setTimeout(openOnboard, 800);
+        if (restoreSession()) {
+          showDashboard(isAdmin);
+        } else if (!localStorage.getItem('gic_demo_seen')) {
+          setTimeout(openOnboard, 800);
+        }
         document.getElementById('onboardModal').addEventListener('click', function (e) { if (e.target === this) closeOnboard(); });
         document.getElementById('authModal').addEventListener('click', function (e) { if (e.target === this) closeAuth(); });
       });

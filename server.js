@@ -17,6 +17,7 @@ let dbReady = false;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 const ZONES = {
   adyar:     { id: 14, name: 'Adyar',     city: 'Chennai', riskLevel: 'high',     lat: 13.0012, lon: 80.2565, activeWorkers: 847  },
@@ -512,7 +513,7 @@ async function start() {
 
   trainAllModels();
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log('\nGIC Backend — Phase 3 v3.2');
     console.log('Running on http://localhost:' + PORT);
     console.log('Database: ' + (dbReady ? 'MongoDB Atlas' : 'NOT CONNECTED — add 0.0.0.0/0 to Atlas Network Access'));
@@ -523,6 +524,14 @@ async function start() {
     runTriggerMonitor();
     setInterval(runTriggerMonitor, 5 * 60 * 1000);
     console.log('[MONITOR] Active — checking every 5 minutes\n');
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[STARTUP] Port ${PORT} is already in use. Stop the existing server or run with a different PORT.`);
+      return;
+    }
+    console.error('[STARTUP]', err);
   });
 }
 

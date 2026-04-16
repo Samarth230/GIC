@@ -165,8 +165,8 @@ Ravi Kumar. Adyar zone. Earns ₹175 lunch / ₹310 dinner on a good day. Loses 
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Dev_Trail.git
-cd Dev_Trail
+git clone https://github.com/YOUR_USERNAME/GIC.git
+cd GIC
 npm install
 ```
 
@@ -176,10 +176,13 @@ npm install
 cp .env.example .env
 ```
 
-Open `.env` and add your Razorpay credentials:
+Open `.env` and add the required runtime values:
 ```
+MONGODB_URI=your_mongodb_connection_string
 RAZORPAY_KEY_ID=rzp_test_YourKeyHere
 RAZORPAY_KEY_SECRET=YourSecretHere
+XAI_API_KEY=your_xai_key_here
+WAQI_TOKEN=demo
 ```
 
 > Get keys from: [Razorpay Dashboard](https://dashboard.razorpay.com) → Settings → API Keys
@@ -187,13 +190,27 @@ RAZORPAY_KEY_SECRET=YourSecretHere
 ### 3. Start the Server
 
 ```bash
-node server.js
+npm start
 # API available at http://localhost:3001
 ```
 
 ### 4. Open the App
 
-Open `index.html` in your browser. The frontend works standalone (mock fallbacks), but connecting to the backend enables live API features.
+Open `http://localhost:3001` in your browser. This project is designed to run through `server.js`, which serves the frontend and the `/api/...` routes from the same origin.
+
+If you open `index.html` directly or use `npx serve`, the UI will still render with mock fallbacks, but that is only a demo mode and not the real app runtime.
+
+### 5. Deploy
+
+Recommended hosting: Render, Railway, Fly.io, or any VPS that can keep a Node process running.
+
+1. Create a web service for this repo.
+2. Set the start command to `npm start`.
+3. Add the environment variables from `.env.example`.
+4. Prefer setting `MONGODB_URI` to a MongoDB Atlas database so claims, workers, and fraud flags persist.
+5. Deploy the app as a single Node service so the frontend and API stay on the same origin.
+
+Avoid static-only hosting for the real product. The frontend depends on backend API routes, ML-backed responses, and a recurring trigger monitor started by `server.js`.
 
 ---
 

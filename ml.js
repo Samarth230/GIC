@@ -5,6 +5,17 @@ let fraudNet    = null;
 let churnNet    = null;
 let forecastNet = null;
 
+function normalizeBrainOutput(output) {
+  if (Array.isArray(output)) return Number(output[0] || 0);
+  if (typeof output === 'number') return Number(output);
+  if (output && typeof output === 'object') {
+    if (output[0] !== undefined) return Number(output[0]);
+    const firstValue = Object.values(output)[0];
+    return Number(firstValue || 0);
+  }
+  return 0;
+}
+
 function generatePremiumTrainingData() {
   const data = [];
   const zones   = [0.15, 0.42, 0.68, 0.90];
@@ -92,7 +103,7 @@ function trainAllModels() {
 function predictPremium(zoneRisk, streak, activeDays, bcr, forecastRisk, seasonal) {
   if (!premiumNet) return { premium: 55, confidence: 0, source: 'fallback' };
   const output = premiumNet.run([zoneRisk, Math.min(streak / 12, 1), activeDays / 30, bcr, forecastRisk ? 1 : 0, seasonal]);
-  const raw = Number(Array.isArray(output) ? output[0] : (output[0] !== undefined ? output[0] : output));
+  const raw = normalizeBrainOutput(output);
   const premium = Math.round(29 + (89 - 29) * raw);
   return { premium: Math.max(29, Math.min(89, premium)), raw_score: parseFloat(raw.toFixed(4)), confidence: parseFloat((0.80 + raw * 0.15).toFixed(2)), source: 'brain_js_neural_net' };
 }
@@ -100,21 +111,21 @@ function predictPremium(zoneRisk, streak, activeDays, bcr, forecastRisk, seasona
 function predictFraud(peerDiv, newAcct, claimFreq, rainGap, temporal) {
   if (!fraudNet) return { score: 0, source: 'fallback' };
   const output = fraudNet.run([peerDiv, newAcct, claimFreq, rainGap, temporal]);
-  const raw = Array.isArray(output) ? output[0] : output;
+  const raw = normalizeBrainOutput(output);
   return { score: parseFloat(raw.toFixed(4)), source: 'brain_js_neural_net' };
 }
 
 function predictChurn(streak, totalClaims, premRatio, daysSincePayout, zoneRisk, weeksEnrolled) {
   if (!churnNet) return { churn_probability: 0, source: 'fallback' };
   const output = churnNet.run([streak, totalClaims, premRatio, daysSincePayout, zoneRisk, weeksEnrolled]);
-  const raw = Array.isArray(output) ? output[0] : output;
+  const raw = normalizeBrainOutput(output);
   return { churn_probability: parseFloat(raw.toFixed(4)), source: 'brain_js_neural_net' };
 }
 
 function predictTrigger(month, dayOfWeek, forecastAvg, zoneFlood, seasonal) {
   if (!forecastNet) return { trigger_probability: 0, source: 'fallback' };
   const output = forecastNet.run([month, dayOfWeek, forecastAvg, zoneFlood, seasonal]);
-  const raw = Array.isArray(output) ? output[0] : output;
+  const raw = normalizeBrainOutput(output);
   return { trigger_probability: parseFloat(raw.toFixed(4)), source: 'brain_js_neural_net' };
 }
 

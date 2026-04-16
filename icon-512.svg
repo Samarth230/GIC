@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GIC app icon">
+  <rect width="512" height="512" rx="120" fill="#16140F"/>
+  <rect x="44" y="44" width="424" height="424" rx="96" fill="#211D16" stroke="#3B3224" stroke-width="12"/>
+  <path d="M148 256c0-64 43-112 101-112 29 0 56 10 77 29l-28 33c-14-12-28-19-45-19-35 0-59 28-59 69 0 43 24 71 58 71 19 0 36-7 50-20l28 32c-23 23-49 34-81 34-60 0-101-44-101-117z" fill="#C8A96E"/>
+  <path d="M357 145h38v223h-38z" fill="#C8A96E"/>
+  <circle cx="378" cy="390" r="22" fill="#87D8A5"/>
+</svg>

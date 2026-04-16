@@ -1,10 +1,11 @@
 {
   "name": "gic-backend",
   "version": "2.0.0",
-  "description": "GIC — Gig Income Coverage · Phase 2 Backend API",
+  "description": "GIC — Gig Income Coverage · Phase 3 Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "server": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
