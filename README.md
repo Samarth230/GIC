@@ -568,7 +568,7 @@ Every claim stores its full AI-3 signal vector, peer context, rainfall reading, 
 
 ## Pitch Deck
 
-Link for Pitch Deck - 
+Link for Pitch Deck - https://docs.google.com/presentation/d/1gg-y3pf1Vrq_z-IqS6rlKz-l2R6qjkZR/edit?usp=sharing&ouid=115617659625771048360&rtpof=true&sd=true
 
 ---
 
