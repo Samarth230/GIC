@@ -564,10 +564,11 @@ Every claim stores its full AI-3 signal vector, peer context, rainfall reading, 
 
 ---
 
-##Pitch Deck
+## Pitch Deck
 
 Link for Pitch Deck - 
 
+---
 
 ## Collaborators
 
