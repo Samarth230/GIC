@@ -65,6 +65,8 @@ Coverage costs between **₹29 and ₹89/week**, computed fresh each week by a n
 
 `docs/screenshots/ai-chat.png`
 <img width="223" height="247" alt="image" src="https://github.com/user-attachments/assets/03767df3-31f8-4e88-9d7b-ac9db6e78af7" />
+
+
 <img width="259" height="741" alt="image" src="https://github.com/user-attachments/assets/22ef27db-a3b0-4ac4-b284-fba35a8ca5aa" />
 
 
