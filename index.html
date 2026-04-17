@@ -4044,7 +4044,7 @@
         const upi = document.getElementById('upiInput').value || '';
         const phone = document.getElementById('phoneInput').value;
         const zoneInfo = ZONE_COORDS[zone] || ZONE_COORDS.adyar;
-        const res = await apiPost('/api/auth/register', { name, platform, zone, upi, worker_id: platform.toUpperCase().slice(0, 3) + '-' + Date.now() });
+        const res = await apiPost('/api/auth/register', { name, platform, zone, upi, phone: '+91 ' + phone, worker_id: platform.toUpperCase().slice(0, 3) + '-' + Date.now() });
         if (res && res.worker) {
           workerId = res.worker.id;
           workerData = res.worker;

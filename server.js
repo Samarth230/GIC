@@ -31,6 +31,21 @@ const ZONES = {
 const ZONE_RISK_MAP  = { low: 0.15, medium: 0.42, high: 0.68, critical: 0.90 };
 const zoneThresholds = { adyar: 15, tnagar: 15, mylapore: 15, velachery: 14, guindy: 15, egmore: 15 };
 
+function normalizePhone(phone) {
+  return String(phone || '').replace(/\D/g, '');
+}
+
+async function findWorkerByPhone(phone) {
+  const exact = await Worker.findOne({ phone });
+  if (exact) return exact;
+
+  const normalized = normalizePhone(phone);
+  if (!normalized) return null;
+
+  const workers = await Worker.find({ phone: { $exists: true, $ne: null } });
+  return workers.find((worker) => normalizePhone(worker.phone) === normalized) || null;
+}
+
 // ─── OPEN-METEO WEATHER ───
 let weatherCache = {};
 const weatherStates = [
@@ -379,21 +394,21 @@ app.post('/api/auth/send-otp', (req, res) => {
 app.post('/api/auth/verify-otp', async (req, res) => {
   const { phone, otp } = req.body;
   if (!phone || !otp || otp.length !== 6) return res.status(400).json({ error: 'Invalid OTP' });
-  const existing = await Worker.findOne({ phone });
+  const existing = await findWorkerByPhone(phone);
   if (existing) return res.json({ success: true, new_user: false, worker: existing, token: 'tok_' + existing.id });
   res.json({ success: true, new_user: true, token: 'tok_new' });
 });
 
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { name, platform, worker_id, zone, upi } = req.body;
-    if (!name || !platform || !upi) return res.status(400).json({ error: 'Name, platform, UPI required' });
+    const { name, platform, worker_id, zone, upi, phone } = req.body;
+    if (!name || !platform || !upi || !phone) return res.status(400).json({ error: 'Name, platform, UPI, phone required' });
     const id       = 'W-' + Math.floor(1000 + Math.random() * 9000);
     const zoneKey  = zone || 'adyar';
     const zoneInfo = ZONES[zoneKey] || ZONES.adyar;
     const prem     = await calcPremiumML(zoneInfo.riskLevel, 0, false, 0, zoneKey);
     const newWorker = await Worker.create({
-      id, name, platform, workerId: worker_id || platform.toUpperCase().slice(0, 3) + '-' + id,
+      id, name, platform, workerId: worker_id || platform.toUpperCase().slice(0, 3) + '-' + id, phone,
       zone: zoneKey, zoneId: zoneInfo.id, upi, activeDays: 0, joinDate: new Date().toISOString().split('T')[0],
       coverageStatus: 'building_baseline', baselineEarnings: { lunch: 150, dinner: 280, avg_orders_per_hr: 6.0 },
       streak: 0, riskTier: zoneInfo.riskLevel, policyStart: new Date().toISOString().split('T')[0],
@@ -413,7 +428,7 @@ app.post('/api/auth/register', async (req, res) => {
     const zoneInfo = ZONES[zoneKey] || ZONES.adyar;
     res.status(200).json({
       success: true,
-      worker: { id: 'W-DEMO', name: req.body.name, platform: req.body.platform, upi: req.body.upi, zone: zoneKey, zoneId: zoneInfo.id, coverageStatus: 'active', streak: 0, riskTier: zoneInfo.riskLevel, activeDays: 0 },
+      worker: { id: 'W-DEMO', name: req.body.name, platform: req.body.platform, upi: req.body.upi, phone: req.body.phone, zone: zoneKey, zoneId: zoneInfo.id, coverageStatus: 'active', streak: 0, riskTier: zoneInfo.riskLevel, activeDays: 0 },
       policy: { id: 'POL-DEMO', premium: 63, status: 'active', weekStart: new Date().toISOString().split('T')[0], weekEnd: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0], premiumBreakdown: { base: 29, zoneAdj: 12, streakDiscount: 0, forecastSurcharge: 8 } },
     });
   }
